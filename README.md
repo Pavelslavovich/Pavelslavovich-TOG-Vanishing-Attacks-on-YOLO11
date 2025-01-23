@@ -4,7 +4,7 @@ TOG: Targeted Adversarial Objectness Gradient Attacks on Real-time Object Detect
 Задание посвящено атаке нейронной сети, решающей задачу детекции (обнаружения) объектов на изображениях.
   Normal Detection  |  TOG-Vanishing
 :-------------------------:|:-------------------------:
-![](https://github.com/Pavelslavovich/TOG-Vanishing-Attacks-on-YOLO11/blob/6b3216952287e89e06ee39397a9a44adfbab4eaf/Result/predicted_video.gif)  |  ![](https://github.com/Pavelslavovich/TOG-Vanishing-Attacks-on-YOLO11/blob/6b3216952287e89e06ee39397a9a44adfbab4eaf/Result/attacked_video.gif)
+![](https://github.com/Pavelslavovich/TOG-Vanishing-Attacks-on-YOLO11/blob/77cd6cc63332381481b1736a86cba554b37e2fd3/Result/predicted_video.gif)  |  ![](https://github.com/Pavelslavovich/TOG-Vanishing-Attacks-on-YOLO11/blob/6b3216952287e89e06ee39397a9a44adfbab4eaf/Result/attacked_video.gif)
 
 
 
