@@ -18,3 +18,6 @@ YOLOv11 была обучена на наборе данных COCO 2017. Поэ
 - Linf-норма вносимого в картинки возмущения — 4/255;
 - размер шага в направлении градиента — 1/255;
 - количество итераций атаки — 10.
+
+
+![](https://github.com/Pavelslavovich/TOG-Vanishing-Attacks-on-YOLO11/blob/05c3aacc23493efa75f57d233d82eb7eb77f552e/Result/visualization_1.png)
