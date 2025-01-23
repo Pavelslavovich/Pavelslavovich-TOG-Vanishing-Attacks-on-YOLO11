@@ -7,6 +7,14 @@ TOG: Targeted Adversarial Objectness Gradient Attacks on Real-time Object Detect
 ![](https://github.com/Pavelslavovich/TOG-Vanishing-Attacks-on-YOLO11/blob/77cd6cc63332381481b1736a86cba554b37e2fd3/Result/predicted_video.gif)  |  ![](https://github.com/Pavelslavovich/TOG-Vanishing-Attacks-on-YOLO11/blob/6b3216952287e89e06ee39397a9a44adfbab4eaf/Result/attacked_video.gif)
 
 
+![](https://github.com/Pavelslavovich/TOG-Vanishing-Attacks-on-YOLO11/blob/05c3aacc23493efa75f57d233d82eb7eb77f552e/Result/visualization_1.png)
+
+![](https://github.com/Pavelslavovich/TOG-Vanishing-Attacks-on-YOLO11/blob/05c3aacc23493efa75f57d233d82eb7eb77f552e/Result/visualization_2.png)
+
+![](https://github.com/Pavelslavovich/TOG-Vanishing-Attacks-on-YOLO11/blob/05c3aacc23493efa75f57d233d82eb7eb77f552e/Result/visualization_3.png)
+
+![](https://github.com/Pavelslavovich/TOG-Vanishing-Attacks-on-YOLO11/blob/05c3aacc23493efa75f57d233d82eb7eb77f552e/Result/visualization_4.png)
+
 
 Две недели назад вышла новая версия самой популярной сети для детекции — YOLOv11. Именно была взята в качестве жертвы.
 YOLOv11 была обучена на наборе данных COCO 2017. Поэтому и оценка работы нейросети в условиях атаки была произведена на этом наборе. Валидационная часть набора COCO 2017 состоит из 5000 изображений с верной (ground truth) разметкой.
@@ -18,6 +26,3 @@ YOLOv11 была обучена на наборе данных COCO 2017. Поэ
 - Linf-норма вносимого в картинки возмущения — 4/255;
 - размер шага в направлении градиента — 1/255;
 - количество итераций атаки — 10.
-
-
-![](https://github.com/Pavelslavovich/TOG-Vanishing-Attacks-on-YOLO11/blob/05c3aacc23493efa75f57d233d82eb7eb77f552e/Result/visualization_1.png)
