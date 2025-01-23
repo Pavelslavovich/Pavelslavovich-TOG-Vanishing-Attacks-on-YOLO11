@@ -6,13 +6,14 @@ import torch
 import torchvision.transforms.functional as TF
 import os
 from typing import List, Tuple
-
+import cv2
+import time
 # Path to images for testing
 data = [
-    "/home/pavel/isp2025/val2017/images_1/1.jpg",
-    "/home/pavel/isp2025/val2017/images_1/2.jpg",
-    "/home/pavel/isp2025/val2017/images_1/3.jpg",
-    "/home/pavel/isp2025/val2017/images_1/4.jpg",
+    "/1.jpg",
+    "/2.jpg",
+    "/3.jpg",
+    "/4.jpg",
 ]
 
 class AdversarialYOLO(YOLO):
@@ -52,6 +53,60 @@ class AdversarialYOLO(YOLO):
                 image = torch.clamp(image - perturbation, 0, 1).detach().requires_grad_(True)
 
         return image
+    
+    def attack_video(self, video_path: str, output_path: str = "output/attacked_video.mp4"):
+        """Perform adversarial attack on a video and save the result."""
+        cap = cv2.VideoCapture(video_path)
+
+        if not cap.isOpened():
+            raise ValueError(f"Unable to open video file: {video_path}")
+
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+        # Use a codec compatible with .mp4
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+
+        print(f"Processing video: {video_path}")
+        print(f"Video properties - Width: {width}, Height: {height}, FPS: {fps}, Frame count: {frame_count}")
+
+        frame_index = 0
+        start_time = time.time()
+
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            # Convert frame to PIL Image for attack
+            frame_pil = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            frame_tensor = process_image(frame_pil, target_size=(width, height))  # Ensure target size matches original
+            attacked_tensor = self.attack(frame_tensor)
+
+            # Convert attacked tensor back to numpy array
+            attacked_frame = (
+                attacked_tensor.detach().cpu().numpy().squeeze(0).transpose(1, 2, 0) * 255
+            ).astype(np.uint8)
+
+            # Convert RGB back to BGR for OpenCV
+            attacked_frame_bgr = cv2.cvtColor(attacked_frame, cv2.COLOR_RGB2BGR)
+
+            # Write frame to output video
+            out.write(attacked_frame_bgr)
+
+            # Log progress
+            elapsed_time = time.time() - start_time
+            print(f"Processed frame {frame_index + 1}/{frame_count}, Time elapsed: {elapsed_time:.2f}s")
+
+            frame_index += 1
+
+        cap.release()
+        out.release()
+        print(f"Attacked video saved to: {output_path}")
+
 
 def resize_with_padding(img: Image.Image, target_size: Tuple[int, int] = (640, 640)) -> Image.Image:
     """Resize the image to fit within the target size, adding black padding if necessary."""
@@ -73,13 +128,15 @@ def resize_with_padding(img: Image.Image, target_size: Tuple[int, int] = (640, 6
 
     return new_img
 
-def process_image(img: Image.Image) -> torch.Tensor:
-    """Resize the image with padding and convert it to a tensor."""
-    img_resized = resize_with_padding(img, target_size=(640, 640))
+def process_image(img: Image.Image, target_size: tuple = (640, 640)) -> torch.Tensor:
+    """Resize image with padding and convert it to a tensor."""
+    img_resized = img.resize(target_size)
     img_tensor = torch.tensor(
         np.array(img_resized).transpose(2, 0, 1) / 255.0, dtype=torch.float32
     ).unsqueeze(0)
     return img_tensor
+
+
 
 def visualize_and_save_attacks(
     original_images: List[Image.Image],
@@ -106,7 +163,7 @@ def visualize_and_save_attacks(
         adv_img_np = adv.detach().cpu().numpy().squeeze(0).transpose(1, 2, 0) * 255
         adv_img_np = adv_img_np.astype(np.uint8)
 
-        attacked_image_path = os.path.join(attack_dir, f"attacked_{i+1}.png")
+        attacked_image_path = os.path.join(attack_dir, f"attacked_{i}.png")
         Image.fromarray(adv_img_np).save(attacked_image_path)
 
         fig, axs = plt.subplots(1, 3, figsize=(20, 6))
@@ -130,6 +187,36 @@ def visualize_and_save_attacks(
         print(f"Visualization saved to {visualization_path}")
         print(f"Attacked image saved to {attacked_image_path}")
 
+def predict_video(video_path: str, model_path: str, output_path: str = "output/predicted_video.mp4"):
+    """Run predictions on a video and save the result."""
+    cap = cv2.VideoCapture(video_path)
+
+    if not cap.isOpened():
+        raise ValueError(f"Unable to open video file: {video_path}")
+
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+
+    model = YOLO(model_path)
+
+    print(f"Processing video for predictions: {video_path}")
+
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        result = model.predict(frame, imgsz=(640, 640))[0]
+        result_frame = result.plot(line_width=2)
+        out.write(result_frame)  # Convert RGB to BGR
+
+    cap.release()
+    out.release()
+    print(f"Predicted video saved to: {output_path}")
+
 def main():
     model_path = "yolo11n.pt"
     adversarial_model = AdversarialYOLO(model_path)
@@ -140,6 +227,17 @@ def main():
     ]
 
     visualize_and_save_attacks(original_images, attacked_images, model_path)
+
+    # Process video with attack
+    input_video_path = "/1.mp4"  # Replace with your video path
+    adversarial_model.attack_video(input_video_path, output_path="output/attacked_video.mp4")
+
+    # Process video with predictions
+    predict_video(
+        video_path=input_video_path,  # Use attacked video for predictions
+        model_path=model_path,
+        output_path="output/predicted_video.mp4"
+    )
 
 if __name__ == "__main__":
     main()
