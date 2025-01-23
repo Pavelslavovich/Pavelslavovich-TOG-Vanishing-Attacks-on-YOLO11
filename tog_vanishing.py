@@ -106,7 +106,7 @@ def visualize_and_save_attacks(
         adv_img_np = adv.detach().cpu().numpy().squeeze(0).transpose(1, 2, 0) * 255
         adv_img_np = adv_img_np.astype(np.uint8)
 
-        attacked_image_path = os.path.join(attack_dir, f"attacked_{i}.png")
+        attacked_image_path = os.path.join(attack_dir, f"attacked_{i+1}.png")
         Image.fromarray(adv_img_np).save(attacked_image_path)
 
         fig, axs = plt.subplots(1, 3, figsize=(20, 6))
@@ -122,7 +122,7 @@ def visualize_and_save_attacks(
         axs[2].set_title("Attacked Image with Detection", fontsize=12)
         axs[2].axis("off")
 
-        visualization_path = os.path.join(save_dir, f"visualization_{i}.png")
+        visualization_path = os.path.join(save_dir, f"visualization_{i+1}.png")
         plt.tight_layout()
         plt.savefig(visualization_path)
         plt.close()
